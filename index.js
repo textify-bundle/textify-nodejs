@@ -9,50 +9,48 @@ app.use(cors());
 app.use(express.json());
 
 // In-memory storage for click counts
-const clickCounts = new Map();
+const userClicks = new Map();
 
 // Start session
 app.post('/start-session', (req, res) => {
-    const { userName, projectName } = req.body;
-    const key = `${userName}_${projectName}`;
+    const { userName } = req.body;
     
-    if (!clickCounts.has(key)) {
-        clickCounts.set(key, 0);
+    if (!userClicks.has(userName)) {
+        userClicks.set(userName, 0);
     }
     
-    res.json({ message: 'Session started', clicks: clickCounts.get(key) });
+    res.json({ 
+        message: 'Session started', 
+        clicks: userClicks.get(userName) 
+    });
 });
 
 // Register click
 app.post('/click', (req, res) => {
-    const { userName, projectName } = req.body;
-    const key = `${userName}_${projectName}`;
+    const { userName } = req.body;
     
-    if (!clickCounts.has(key)) {
-        clickCounts.set(key, 0);
+    if (!userClicks.has(userName)) {
+        userClicks.set(userName, 0);
     }
     
-    const newCount = clickCounts.get(key) + 1;
-    clickCounts.set(key, newCount);
+    const newCount = userClicks.get(userName) + 1;
+    userClicks.set(userName, newCount);
     
     res.json({ clicks: newCount });
 });
 
 // Get clicks
 app.get('/clicks', (req, res) => {
-    const { userName, projectName } = req.query;
-    const key = `${userName}_${projectName}`;
-    
-    const clicks = clickCounts.get(key) || 0;
+    const { userName } = req.query;
+    const clicks = userClicks.get(userName) || 0;
     res.json({ clicks });
 });
 
 // End session
 app.post('/end-session', (req, res) => {
-    const { userName, projectName } = req.body;
-    const key = `${userName}_${projectName}`;
+    const { userName } = req.body;
+    const clicks = userClicks.get(userName) || 0;
     
-    const clicks = clickCounts.get(key) || 0;
     res.json({ 
         message: 'Session ended',
         clicks: clicks 
